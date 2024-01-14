@@ -1,0 +1,9 @@
+[
+  {
+    "path": "/path/to/folder/to/save",
+    "options": {
+      "mimeType": "folder",
+      "deleteExisting": true
+    }
+  }
+]
