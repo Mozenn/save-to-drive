@@ -21,7 +21,7 @@ save-to-drive -h
 4. To start uploading an element using the saves file, run :
 
 ```console
-save-to-drive -c absolute/path/to/saves
+save-to-drive -s absolute/path/to/saves -c absolute/path/to/credentials.json
 ```
 
 ## Tips
