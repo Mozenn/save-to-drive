@@ -82,7 +82,7 @@ async function setCredentialsPath() {
 }
 
 /**
- * Serializes credentials to a file compatible with GoogleAUth.fromJSON.
+ * Serializes credentials to a file compatible with GoogleAuth.fromJSON.
  *
  * @param {OAuth2Client} client
  * @return {Promise<void>}
