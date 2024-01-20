@@ -16,7 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
-const TOKEN_PATH = path.join(__dirname, "..", "token.json");
+const TOKEN_PATH = path.join(os.tmpdir(), ".save-to-drive", "token.json");
 let credentialsPath = path.join(
   os.tmpdir(),
   ".save-to-drive",
