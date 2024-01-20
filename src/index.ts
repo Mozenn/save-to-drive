@@ -39,7 +39,7 @@ type SaveElement = {
 const program = new Command();
 
 program
-  .version("1.0.0")
+  .version(await getCurrentVersion())
   .description("A CLI application to upload files and folders to google drive")
   .option(
     "-p, --path <value>",
@@ -51,6 +51,24 @@ program
   .parse(process.argv);
 
 const options = program.opts();
+
+/**
+ * Get current package.json version
+ *
+ * @return the current package.json version
+ */
+async function getCurrentVersion() {
+  const packageJsonPath = path.join(__dirname, "..", "package.json");
+
+  const packageJsonContents = await fsPromises.readFile(
+    packageJsonPath,
+    "utf8"
+  );
+
+  const packageJson = JSON.parse(packageJsonContents);
+
+  return packageJson.version;
+}
 
 /**
  * Reads previously authorized credentials from the save file.
@@ -76,7 +94,6 @@ async function setCredentialsPath() {
   }
 
   if (!fs.existsSync(credentialsPath)) {
-    console.log("Cred path", credentialsPath);
     throw "No credentials found";
   }
 }
@@ -357,7 +374,6 @@ async function getElements(): Promise<SaveElement[]> {
     const content = await fsPromises.readFile(configPath, "utf8");
     saveElements = JSON.parse(content);
   } else {
-    console.log("g", options.savesPath);
     console.log(
       chalk.red.bold(
         `No valid option has been passed as argument. Nothing has been saved`
