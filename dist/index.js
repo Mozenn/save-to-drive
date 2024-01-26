@@ -200,14 +200,20 @@ async function createFolder(authClient, directoryName, folderId) {
  *
  * @param {OAuth2Client} authClient
  * @param {string} folderPath
- * @param {string} parentfolderId
+ * @param {string} folderId
+ * @param {string} toIgnore
  */
-async function uploadFolder(authClient, folderPath, folderId) {
+async function uploadFolder(authClient, folderPath, folderId, toIgnore) {
     const folderName = getNameFromPath(folderPath);
     const folder = await createFolder(authClient, folderName, folderId);
     const files = fs.readdirSync(folderPath);
     for (const file of files) {
         const filePath = path.join(folderPath, file);
+        const fileName = getNameFromPath(filePath);
+        if (toIgnore?.includes(fileName)) {
+            console.log(chalk.yellow.bold(`File ignored: ${fileName}`));
+            continue;
+        }
         if (fs.lstatSync(filePath).isDirectory() && folder?.data?.id) {
             await uploadFolder(authClient, filePath, folder.data.id);
         }
@@ -231,7 +237,7 @@ async function uploadFolder(authClient, folderPath, folderId) {
  */
 async function uploadElement(authClient, element) {
     if (fs.lstatSync(element.path).isDirectory()) {
-        await uploadFolder(authClient, element.path, element?.options?.baseFolderId);
+        await uploadFolder(authClient, element.path, element?.options?.baseFolderId, element?.options?.ignore);
     }
     else {
         try {

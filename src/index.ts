@@ -29,6 +29,7 @@ type SaveOptions = {
   mimeType: SaveElementType;
   deleteExisting?: boolean;
   baseFolderId?: string;
+  ignore?: string[];
 };
 
 type SaveElement = {
@@ -259,12 +260,14 @@ async function createFolder(
  *
  * @param {OAuth2Client} authClient
  * @param {string} folderPath
- * @param {string} parentfolderId
+ * @param {string} folderId
+ * @param {string} toIgnore
  */
 async function uploadFolder(
   authClient: any,
   folderPath: string,
-  folderId?: string
+  folderId?: string,
+  toIgnore?: string[]
 ) {
   const folderName = getNameFromPath(folderPath);
   const folder = await createFolder(authClient, folderName, folderId);
@@ -272,6 +275,11 @@ async function uploadFolder(
   const files = fs.readdirSync(folderPath);
   for (const file of files) {
     const filePath = path.join(folderPath, file);
+    const fileName = getNameFromPath(filePath);
+    if (toIgnore?.includes(fileName)) {
+      console.log(chalk.yellow.bold(`File ignored: ${fileName}`));
+      continue;
+    }
     if (fs.lstatSync(filePath).isDirectory() && folder?.data?.id) {
       await uploadFolder(authClient, filePath, folder.data.id);
     } else {
@@ -297,7 +305,8 @@ async function uploadElement(authClient: any, element: SaveElement) {
     await uploadFolder(
       authClient,
       element.path,
-      element?.options?.baseFolderId
+      element?.options?.baseFolderId,
+      element?.options?.ignore
     );
   } else {
     try {

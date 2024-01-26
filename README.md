@@ -37,8 +37,9 @@ Then, get your credentials.json file following https://developers.google.com/wor
 
 Saves files are in JSON format following this structure:
 
-- path (str): Path of the folder to save
+- path (str): Path of the element to save
 - options (array)
   - mimeType (str): mimeType of the element to save
   - deleteExisting (bool): delete first encountered file or folder with the same name as the element to save
   - baseFolderId (str): Id of the folder where the element to save will be uploaded
+  - ignore (array): List of files and folders to ignore within the element to save
