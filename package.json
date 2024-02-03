@@ -1,6 +1,6 @@
 {
   "name": "save-to-drive",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "",
   "main": "dist/index.js",
   "type": "module",
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "installLocal": "tsc && npm i -g ."
   },
   "author": "",
   "repository": "https://github.com/Mozenn/save-to-drive",
@@ -20,7 +21,8 @@
     "@google-cloud/local-auth": "^3.0.1",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
-    "googleapis": "^130.0.0"
+    "googleapis": "^130.0.0",
+    "workerpool": "^9.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

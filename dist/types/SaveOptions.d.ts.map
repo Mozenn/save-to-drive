@@ -1,0 +1,1 @@
+{"version":3,"file":"SaveOptions.d.ts","sourceRoot":"","sources":["../../src/types/SaveOptions.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,sBAAsB,CAAC;AAEvD,MAAM,MAAM,WAAW,GAAG;IACxB,QAAQ,EAAE,eAAe,CAAC;IAC1B,cAAc,CAAC,EAAE,OAAO,CAAC;IACzB,YAAY,CAAC,EAAE,MAAM,CAAC;IACtB,MAAM,CAAC,EAAE,MAAM,EAAE,CAAC;CACnB,CAAC"}
