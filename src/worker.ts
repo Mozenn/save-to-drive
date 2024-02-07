@@ -1,4 +1,4 @@
-import { worker, isMainThread } from "workerpool";
+import { worker } from "workerpool";
 import chalk from "chalk";
 import { google } from "googleapis";
 import * as fs from "fs";
@@ -199,7 +199,6 @@ async function uploadElement(authClient: any, element: SaveElement) {
 async function saveElement(element: SaveElement) {
   if (fs.existsSync(element.path)) {
     const elementName = getNameFromPath(element.path);
-    console.log(logWithColor(`Is main thread ? ${isMainThread}`));
 
     const authClient = await authorize();
 

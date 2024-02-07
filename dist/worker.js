@@ -1,4 +1,4 @@
-import { worker, isMainThread } from "workerpool";
+import { worker } from "workerpool";
 import chalk from "chalk";
 import { google } from "googleapis";
 import * as fs from "fs";
@@ -162,7 +162,6 @@ async function uploadElement(authClient, element) {
 async function saveElement(element) {
     if (fs.existsSync(element.path)) {
         const elementName = getNameFromPath(element.path);
-        console.log(logWithColor(`Is main thread ? ${isMainThread}`));
         const authClient = await authorize();
         const elementToDelete = await getFile(authClient, elementName, element.options);
         await uploadElement(authClient, element);
