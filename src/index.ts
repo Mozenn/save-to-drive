@@ -2,14 +2,14 @@
 
 import * as fsPromises from "fs/promises";
 import path from "path";
-import process from "process";
+import process, { exit } from "process";
 import chalk from "chalk";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { Command } from "commander";
 import { getFileExtension, getNameFromPath } from "./utils.js";
 
-import { pool } from "workerpool";
+import { pool, worker } from "workerpool";
 import { SaveElement } from "./types/SaveElement.js";
 import { Options } from "./types/Options.js";
 import { authorize } from "./auth.js";
@@ -65,9 +65,13 @@ async function saveElements(elements: SaveElement[]) {
   elements.forEach((element) => {
     workerPool
       .exec("saveElement", [element])
-      .then(() => console.log(chalk.blue.bold(`Element saved ${element.path}`)))
       .catch(async (e: any) => {
         console.log(chalk.yellow.bold(`Error on worker.`, e));
+      })
+      .then(async () => {
+        await workerPool.terminate();
+        console.log(chalk.blue.bold(`Element saved ${element.path}`));
+        exit();
       });
   });
 }

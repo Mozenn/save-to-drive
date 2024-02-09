@@ -6,7 +6,15 @@
  */
 export function getNameFromPath(filePath: string) {
   const splitPath = filePath.split("/");
-  const res = splitPath.length - 1 >= 0 ? splitPath[splitPath.length - 1] : "";
+  const res = "";
+  if (splitPath.length - 1 >= 0) {
+    for (let i = splitPath.length - 1; i >= 0; i--) {
+      if (splitPath[i] && splitPath[i] != "") {
+        return splitPath[i];
+      }
+    }
+  }
+
   return res;
 }
 
