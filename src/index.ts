@@ -65,12 +65,14 @@ async function saveElements(elements: SaveElement[]) {
   elements.forEach((element) => {
     workerPool
       .exec("saveElement", [element])
-      .catch(async (e: any) => {
-        console.log(chalk.yellow.bold(`Error on worker.`, e));
+      .then(() => {
+        console.log(chalk.blue.bold(`Element saved ${element.path}`));
+      })
+      .catch((e: Error) => {
+        console.log(chalk.yellow.bold(`Error on worker`));
       })
       .then(async () => {
         await workerPool.terminate();
-        console.log(chalk.blue.bold(`Element saved ${element.path}`));
         exit();
       });
   });

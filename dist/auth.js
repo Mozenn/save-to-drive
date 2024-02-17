@@ -4,6 +4,7 @@ import os from "os";
 import * as fs from "fs";
 import path from "path";
 import * as fsPromises from "fs/promises";
+import chalk from "chalk";
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 const SAVE_TO_DRIVE_PATH = path.join(os.homedir(), ".save-to-drive");
 const TOKEN_PATH = path.join(SAVE_TO_DRIVE_PATH, "token.json");
@@ -73,5 +74,16 @@ export async function authorize() {
         await saveCredentials(client);
     }
     return client;
+}
+/**
+ * Renew auth token when invalid
+ *
+ */
+export async function renewAuth() {
+    console.log(chalk.yellow.bold("Renewing auth token"));
+    if (fs.existsSync(SAVE_TO_DRIVE_PATH)) {
+        fs.rmSync(TOKEN_PATH);
+    }
+    await authorize();
 }
 //# sourceMappingURL=auth.js.map

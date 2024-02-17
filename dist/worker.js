@@ -4,7 +4,7 @@ import { google } from "googleapis";
 import * as fs from "fs";
 import path from "path";
 import { getNameFromPath } from "./utils.js";
-import { authorize } from "./auth.js";
+import { authorize, renewAuth } from "./auth.js";
 function generateRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -163,7 +163,17 @@ async function saveElement(element) {
     if (fs.existsSync(element.path)) {
         const elementName = getNameFromPath(element.path);
         const authClient = await authorize();
-        const elementToDelete = await getFile(authClient, elementName, element.options);
+        let elementToDelete;
+        try {
+            elementToDelete = await getFile(authClient, elementName, element.options);
+        }
+        catch (error) {
+            console.log(chalk.red.bold(`An error occurred: ${error.message}`));
+            if (error.message === "invalid_grant") {
+                renewAuth();
+                elementToDelete = await getFile(authClient, elementName, element.options);
+            }
+        }
         await uploadElement(authClient, element);
         if (element.options.deleteExisting ||
             element.options.deleteExisting === undefined) {

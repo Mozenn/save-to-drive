@@ -44,12 +44,14 @@ async function saveElements(elements) {
     elements.forEach((element) => {
         workerPool
             .exec("saveElement", [element])
-            .catch(async (e) => {
-            console.log(chalk.yellow.bold(`Error on worker.`, e));
+            .then(() => {
+            console.log(chalk.blue.bold(`Element saved ${element.path}`));
+        })
+            .catch((e) => {
+            console.log(chalk.yellow.bold(`Error on worker`));
         })
             .then(async () => {
             await workerPool.terminate();
-            console.log(chalk.blue.bold(`Element saved ${element.path}`));
             exit();
         });
     });

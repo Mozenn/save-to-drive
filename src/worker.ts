@@ -6,7 +6,7 @@ import path from "path";
 import { SaveOptions } from "./types/SaveOptions.js";
 import { getNameFromPath } from "./utils.js";
 import { SaveElement } from "./types/SaveElement.js";
-import { authorize } from "./auth.js";
+import { authorize, renewAuth } from "./auth.js";
 
 function generateRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -201,12 +201,21 @@ async function saveElement(element: SaveElement) {
     const elementName = getNameFromPath(element.path);
 
     const authClient = await authorize();
+    let elementToDelete;
+    try {
+      elementToDelete = await getFile(authClient, elementName, element.options);
+    } catch (error: any) {
+      console.log(chalk.red.bold(`An error occurred: ${error.message}`));
+      if (error.message === "invalid_grant") {
+        await renewAuth();
+        elementToDelete = await getFile(
+          authClient,
+          elementName,
+          element.options
+        );
+      }
+    }
 
-    const elementToDelete = await getFile(
-      authClient,
-      elementName,
-      element.options
-    );
     await uploadElement(authClient, element);
     if (
       element.options.deleteExisting ||
