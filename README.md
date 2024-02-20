@@ -1,5 +1,7 @@
 # Save To Drive
 
+![workflow](https://github.com/Mozenn/save-to-drive/actions/workflows/publish.yml/badge.svg)
+
 Save To Drive is a small CLI application to upload files and folders to google drive.
 
 ## Getting Started
