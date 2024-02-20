@@ -1,6 +1,7 @@
 # Save To Drive
 
 ![workflow](https://github.com/Mozenn/save-to-drive/actions/workflows/publish.yml/badge.svg)
+[![npm version](https://badge.fury.io/js/save-to-drive.svg)](https://badge.fury.io/js/save-to-drive)
 
 Save To Drive is a small CLI application to upload files and folders to google drive.
 
