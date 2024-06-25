@@ -162,15 +162,15 @@ async function uploadElement(authClient, element) {
 async function saveElement(element) {
     if (fs.existsSync(element.path)) {
         const elementName = getNameFromPath(element.path);
-        const authClient = await authorize();
+        let authClient = await authorize();
         let elementToDelete;
         try {
             elementToDelete = await getFile(authClient, elementName, element.options);
         }
         catch (error) {
             console.log(chalk.red.bold(`An error occurred: ${error.message}`));
-            if (error.message === "invalid_grant") {
-                renewAuth();
+            if (error.message.includes("invalid_")) {
+                authClient = await renewAuth();
                 elementToDelete = await getFile(authClient, elementName, element.options);
             }
         }

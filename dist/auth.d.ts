@@ -7,5 +7,5 @@ export declare function authorize(): Promise<import("google-auth-library").BaseE
  * Renew auth token when invalid
  *
  */
-export declare function renewAuth(): Promise<void>;
+export declare function renewAuth(): Promise<import("google-auth-library").BaseExternalAccountClient | import("google-auth-library/build/src/auth/externalAccountAuthorizedUserClient.js").ExternalAccountAuthorizedUserClient | import("google-auth-library").OAuth2Client>;
 //# sourceMappingURL=auth.d.ts.map

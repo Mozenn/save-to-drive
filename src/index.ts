@@ -68,7 +68,7 @@ async function saveElements(elements: SaveElement[]) {
       .then(() => {
         console.log(chalk.blue.bold(`Element saved ${element.path}`));
       })
-      .catch((e: Error) => {
+      .catch((e: any) => {
         console.log(chalk.yellow.bold(`Error on worker ${e}`));
       })
       .then(async () => {

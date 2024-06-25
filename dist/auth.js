@@ -84,6 +84,6 @@ export async function renewAuth() {
     if (fs.existsSync(SAVE_TO_DRIVE_PATH)) {
         fs.rmSync(TOKEN_PATH);
     }
-    await authorize();
+    return await authorize();
 }
 //# sourceMappingURL=auth.js.map

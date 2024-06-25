@@ -94,5 +94,5 @@ export async function renewAuth() {
     fs.rmSync(TOKEN_PATH);
   }
 
-  await authorize();
+  return await authorize();
 }
