@@ -69,7 +69,7 @@ async function saveElements(elements: SaveElement[]) {
         console.log(chalk.blue.bold(`Element saved ${element.path}`));
       })
       .catch((e: Error) => {
-        console.log(chalk.yellow.bold(`Error on worker`));
+        console.log(chalk.yellow.bold(`Error on worker ${e}`));
       })
       .then(async () => {
         await workerPool.terminate();
