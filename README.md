@@ -35,6 +35,7 @@ save-to-drive -s absolute/path/to/saves -c absolute/path/to/credentials.json
 
 You first need to create a google cloud project following https://developers.google.com/workspace/guides/create-project.
 Then, get your credentials.json file following https://developers.google.com/workspace/guides/create-credentials#oauth-client-id.
+The default path to place your credentials file is in your home directory, in ./save-to-drive/credentials.json
 
 ### Saves file
 
@@ -46,3 +47,5 @@ Saves files are in JSON format following this structure:
   - deleteExisting (bool): delete first encountered file or folder with the same name as the element to save
   - baseFolderId (str): Id of the folder where the element to save will be uploaded
   - ignore (array): List of files and folders to ignore within the element to save
+
+Checkout the example saves.json configuration file in /data for more details

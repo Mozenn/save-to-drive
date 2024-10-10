@@ -4,7 +4,11 @@
     "options": {
       "mimeType": "folder",
       "deleteExisting": true,
-      "baseFolderId": "OptionalParentFolderId"
+      "baseFolderId": "OptionalParentFolderId",
+      "ignore": [
+        "file1.txt",
+        "file2.json"
+      ]
     }
   }
 ]
