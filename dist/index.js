@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import { Command } from "commander";
 import { getFileExtension, getNameFromPath } from "./utils.js";
 import { pool } from "workerpool";
-import { authorize } from "./auth.js";
+import { getAuthTokens } from "./auth.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const extension = getFileExtension(getNameFromPath(__filename));
@@ -36,14 +36,20 @@ async function getCurrentVersion() {
 }
 /**
  * Upload elements to google drive
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
  * @param {SaveElement} element Save element to upload
  */
 async function saveElements(elements) {
-    await authorize();
+    const credentials = await getAuthTokens();
+    console.log(chalk.white.bold("credentials " + JSON.stringify(credentials)));
+    // const oauth2Client = await getOAuth2Client(credentials);
+    // console.log(chalk.white.bold("oauth2Client " + JSON.stringify(oauth2Client)));
+    // const drive = google.drive({ version: "v3", auth: oauth2Client });
+    //     await drive.files.get({
+    //     fileId: "1n9s8l2m3o4p5q6r7s8t9u0v1w2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p",
+    //   });
     elements.forEach((element) => {
         workerPool
-            .exec("saveElement", [element])
+            .exec("saveElement", [element, credentials])
             .then(() => {
             console.log(chalk.blue.bold(`Element saved ${element.path}`));
         })
@@ -58,9 +64,7 @@ async function saveElements(elements) {
 }
 /**
  * Get elements to upload google drive
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
- * @param {SaveElement} element Save element to upload
- * @return {Promise<any>}
+ * @return {Promise<SaveElement[]>}
  */
 async function getElements() {
     let saveElements = [];
