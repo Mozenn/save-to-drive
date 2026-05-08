@@ -7,7 +7,7 @@ Save To Drive is a CLI application to upload files and folders to google drive.
 
 ## Getting Started
 
-1. Set up your google cloud project and get your client credentials following [How-to-get-the-client-credentials](#How-to-get-the-credentials.json-file)
+1. Set up your google cloud project and get your client credentials following [How-to-get-the-client-credentials](#How-to-get-the-client-credentials)
 
 2. Install save-to-drive
 
