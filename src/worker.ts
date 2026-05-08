@@ -7,7 +7,7 @@ import { SaveOptions } from "./types/SaveOptions.js";
 import { getNameFromPath } from "./utils.js";
 import { SaveElement } from "./types/SaveElement.js";
 import { Credentials } from "google-auth-library";
-import { getAuthTokens, getOAuth2Client } from "./auth.js";
+import { getOAuth2Client } from "./auth.js";
 
 function generateRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -39,7 +39,7 @@ async function getFile(
 ) {
   const { mimeType = "folder" } = options;
   const drive = google.drive({ version: "v3", auth: authClient });
-  console.log(chalk.white.bold("getting file to delete"));
+  
   const res = await drive.files.list({
     q: `mimeType = 'application/vnd.google-apps.${mimeType}' and trashed = false and name = '${fileName}'`,
     fields: "nextPageToken, files(id, name, modifiedTime)",
@@ -203,21 +203,12 @@ async function saveElement(element: SaveElement, credentials: Credentials) {
   if (fs.existsSync(element.path)) {
     const elementName = getNameFromPath(element.path);
 
-    let authClient = getOAuth2Client(credentials);
+    let authClient = await getOAuth2Client(credentials);
     let elementToDelete;
     try {
       elementToDelete = await getFile(authClient, elementName, element.options);
     } catch (error: any) {
       console.log(chalk.red.bold(`An error occurred: ${error.message}`));
-      if (error.message.includes("invalid_")) {
-        // TODO? should not happen anymore
-        // authClient = {}; 
-        // elementToDelete = await getFile(
-        //   authClient,
-        //   elementName,
-        //   element.options
-        // );
-      }
     }
 
     await uploadElement(authClient, element);

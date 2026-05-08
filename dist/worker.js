@@ -28,7 +28,6 @@ const logWithColor = chalk.rgb(r, g, b).bold;
 async function getFile(authClient, fileName, options) {
     const { mimeType = "folder" } = options;
     const drive = google.drive({ version: "v3", auth: authClient });
-    console.log(chalk.white.bold("getting file to delete"));
     const res = await drive.files.list({
         q: `mimeType = 'application/vnd.google-apps.${mimeType}' and trashed = false and name = '${fileName}'`,
         fields: "nextPageToken, files(id, name, modifiedTime)",
@@ -164,22 +163,13 @@ async function uploadElement(authClient, element) {
 async function saveElement(element, credentials) {
     if (fs.existsSync(element.path)) {
         const elementName = getNameFromPath(element.path);
-        let authClient = getOAuth2Client(credentials);
+        let authClient = await getOAuth2Client(credentials);
         let elementToDelete;
         try {
             elementToDelete = await getFile(authClient, elementName, element.options);
         }
         catch (error) {
             console.log(chalk.red.bold(`An error occurred: ${error.message}`));
-            if (error.message.includes("invalid_")) {
-                // TODO? should not happen anymore
-                // authClient = {}; 
-                // elementToDelete = await getFile(
-                //   authClient,
-                //   elementName,
-                //   element.options
-                // );
-            }
         }
         await uploadElement(authClient, element);
         if (element.options.deleteExisting ||

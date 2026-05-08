@@ -11,9 +11,7 @@ import { getFileExtension, getNameFromPath } from "./utils.js";
 import { pool } from "workerpool";
 import { SaveElement } from "./types/SaveElement.js";
 import { Options } from "./types/Options.js";
-import { getAuthTokens, getOAuth2Client } from "./auth.js";
-import { get } from "http";
-import { google } from "googleapis";
+import { getAuthTokens } from "./auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,7 +30,8 @@ program
   )
   .option("-s, --savesPath <value>", "Path to the saves file")
   .option("-r, --relative", "Use a relative path")
-  .option("-c, --credentialsPath", "Path to the credentials.json file")
+  .option("-a, --app <value>", "Name of the app to open for authentication window (default: firefox)", "firefox")
+  .option("-d, --debug", "Enable debug mode")
   .parse(process.argv);
 
 const options: Options = program.opts();
@@ -60,19 +59,7 @@ async function getCurrentVersion() {
  * @param {SaveElement} element Save element to upload
  */
 async function saveElements(elements: SaveElement[]) {
-  const credentials = await getAuthTokens();
-
-  console.log(chalk.white.bold("credentials " + JSON.stringify(credentials)));
-
-  // const oauth2Client = await getOAuth2Client(credentials);
-
-  // console.log(chalk.white.bold("oauth2Client " + JSON.stringify(oauth2Client)));
-
-  // const drive = google.drive({ version: "v3", auth: oauth2Client });
-
-  //     await drive.files.get({
-  //     fileId: "1n9s8l2m3o4p5q6r7s8t9u0v1w2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p",
-  //   });
+  const credentials = await getAuthTokens(options.app || "firefox");
 
   elements.forEach((element) => {
     workerPool
