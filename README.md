@@ -7,7 +7,7 @@ Save To Drive is a CLI application to upload files and folders to google drive.
 
 ## Getting Started
 
-1. Set up your google cloud project and get your credentials.json file following [How-to-get-the-credentials.json-file](#How-to-get-the-credentials.json-file)
+1. Set up your google cloud project and get your client credentials following [How-to-get-the-client-credentials](#How-to-get-the-credentials.json-file)
 
 2. Install save-to-drive
 
@@ -31,11 +31,15 @@ save-to-drive -s absolute/path/to/saves -c absolute/path/to/credentials.json
 
 ## Tips
 
-### How to get the credentials.json file
+### How to get the client credentials
 
 You first need to create a google cloud project following https://developers.google.com/workspace/guides/create-project.
-Then, get your credentials.json file following https://developers.google.com/workspace/guides/create-credentials#oauth-client-id.
-The default path to place your credentials file is in your home directory, in ./save-to-drive/credentials.json
+Then, get the client id and client secret from your newly created project.
+
+Finaly, set the following environment variables:
+* STD_CLIENT_ID: the client id
+* STD_CLIENT_SECRET: the client secret
+* STD_REDIRECT_URI (optional, default to http://localhost:3000/callback): the redirect uri used to retrieve the token once you are authenticated. A local server is created using this hostname and port to receive the callback request from the google auth flow.
 
 ### Saves file
 

@@ -1,98 +1,107 @@
-import { authenticate } from "@google-cloud/local-auth";
 import { google } from "googleapis";
-import os from "os";
-import * as fs from "fs";
-import path from "path";
-import * as fsPromises from "fs/promises";
 import chalk from "chalk";
+import * as http from "http";
+import open from "open";
+import * as url from "url";
+import { Credentials } from "google-auth-library";
 
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
-const SAVE_TO_DRIVE_PATH = path.join(os.homedir(), ".save-to-drive");
-const TOKEN_PATH = path.join(SAVE_TO_DRIVE_PATH, "token.json");
-let credentialsPath = path.join(SAVE_TO_DRIVE_PATH, "credentials.json");
 
 /**
- * Reads previously authorized credentials from the save file.
+ * Get an auth token using oauth2 flow, and return the credentials
  *
- * @return {Promise<OAuth2Client|null>}
  */
-async function loadSavedCredentialsIfExist() {
-  try {
-    const content = await fsPromises.readFile(TOKEN_PATH, "utf8");
-    const credentials = JSON.parse(content);
-    return google.auth.fromJSON(credentials);
-  } catch (err) {
-    return null;
-  }
-}
+export async function getAuthTokens(app: string, debug?: boolean): Promise<Credentials> {
 
-/**
- * Set credentials.json path
- */
-async function setCredentialsPath(credentialsPathOverride?: string) {
-  if (credentialsPathOverride && fs.existsSync(credentialsPathOverride)) {
-    credentialsPath = credentialsPathOverride;
+  const { oauth2Client, redirectUri } = createOAuth2Client();
+
+  if (debug) {
+    console.log(chalk.white.bold("oauth2Client created with redirectUri: " + redirectUri));
   }
 
-  if (!fs.existsSync(credentialsPath)) {
-    throw "No credentials found";
-  }
-}
-
-/**
- * Serializes credentials to a file compatible with GoogleAuth.fromJSON.
- *
- * @param {OAuth2Client} client
- * @return {Promise<void>}
- */
-async function saveCredentials(client: any) {
-  const content = await fsPromises.readFile(credentialsPath, "utf8");
-  const keys = JSON.parse(content);
-  const key = keys.installed || keys.web;
-  const payload = JSON.stringify({
-    type: "authorized_user",
-    client_id: key.client_id,
-    client_secret: key.client_secret,
-    refresh_token: client.credentials.refresh_token,
+  const authorizeUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES.join(' '),
   });
-  await fsPromises.writeFile(TOKEN_PATH, payload);
+
+  if (debug) {
+    console.log(chalk.white.bold("authorizeUrl generated: " + authorizeUrl));
+  }
+
+  const redirectUrl = new url.URL(redirectUri);
+
+  const server = http
+    .createServer(async (req, res) => {
+      try {
+        if (debug) {
+          console.log(chalk.white.bold("request received: " + req.url));
+        }
+        const redirectUriLastSegment = redirectUri.split('/').slice(-1)[0];
+        if (req.url && req.url.indexOf(`/${redirectUriLastSegment}`) > -1) {
+          const redirectUriBase = redirectUrl.protocol + '//' + redirectUrl.host;
+          const qs = new url.URL(req.url, redirectUriBase)
+            .searchParams;
+          res.end('Authentication successful! Please return to the console.');
+          const { tokens } = await oauth2Client.getToken(qs.get('code') || '');
+          if (debug) {
+            console.log(chalk.white.bold("token: " + JSON.stringify(tokens)));
+          }
+          oauth2Client.setCredentials(tokens);
+          server.emit('token');
+        }
+      } catch (e: any) {
+        console.log(chalk.red.bold("error during processing request: " + JSON.stringify(e)));
+      }
+    })
+    .listen(Number(redirectUrl.port), async () => {
+      if (debug) {
+        console.log(chalk.white.bold("server started, listening on port " + redirectUrl.port));
+      }
+    });
+
+  if (debug) {
+    console.log(chalk.white.bold("opening auth URL in browser: " + authorizeUrl));
+  }
+
+  await open(authorizeUrl, { app: app, wait: true });
+
+  if (oauth2Client.credentials && Object.keys(oauth2Client.credentials).length > 0) {
+    server.close();
+  } else {
+    await new Promise<void>((resolve) => {
+      if (debug) {
+        console.log(chalk.white.bold("waiting for token..."));
+      }
+      server.on('token', () => {
+        server.close();
+        if (debug) {
+          console.log(chalk.white.bold("server closed"));
+        }
+        resolve();
+      });
+    });
+  }
+
+  if (debug) {
+    console.log(chalk.white.bold("oauth2Client creds" + JSON.stringify(oauth2Client.credentials)));
+  }
+
+  return oauth2Client.credentials;
 }
 
 /**
- * Load or request or authorization to call APIs.
+ * Get an oauth2 client with the given credentials
  *
  */
-export async function authorize() {
-  if (!fs.existsSync(SAVE_TO_DRIVE_PATH)) {
-    fs.mkdirSync(SAVE_TO_DRIVE_PATH);
-  }
-
-  await setCredentialsPath();
-
-  let savedClient = await loadSavedCredentialsIfExist();
-  if (savedClient) {
-    return savedClient;
-  }
-
-  let client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: credentialsPath,
-  });
-  if (client?.credentials) {
-    await saveCredentials(client);
-  }
-  return client;
+export async function getOAuth2Client(credentials: Credentials) {
+  const { oauth2Client } = createOAuth2Client();
+  oauth2Client.setCredentials(credentials);
+  return oauth2Client;
 }
 
-/**
- * Renew auth token when invalid
- *
- */
-export async function renewAuth() {
-  console.log(chalk.yellow.bold("Renewing auth token"));
-  if (fs.existsSync(SAVE_TO_DRIVE_PATH)) {
-    fs.rmSync(TOKEN_PATH);
-  }
+function createOAuth2Client() {
+  const redirectUri = process.env.STD_REDIRECT_URI || "http://localhost:3000/callback";
+  const oauth2Client = new google.auth.OAuth2({ clientId: process.env.STD_CLIENT_ID, clientSecret: process.env.STD_CLIENT_SECRET, redirectUri });
 
-  return await authorize();
+  return { oauth2Client, redirectUri };
 }

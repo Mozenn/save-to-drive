@@ -8,11 +8,10 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { Command } from "commander";
 import { getFileExtension, getNameFromPath } from "./utils.js";
-
-import { pool, worker } from "workerpool";
+import { pool } from "workerpool";
 import { SaveElement } from "./types/SaveElement.js";
 import { Options } from "./types/Options.js";
-import { authorize } from "./auth.js";
+import { getAuthTokens } from "./auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,7 +30,8 @@ program
   )
   .option("-s, --savesPath <value>", "Path to the saves file")
   .option("-r, --relative", "Use a relative path")
-  .option("-c, --credentialsPath", "Path to the credentials.json file")
+  .option("-a, --app <value>", "Name of the app to open for authentication window (default: firefox)", "firefox")
+  .option("-d, --debug", "Enable debug mode")
   .parse(process.argv);
 
 const options: Options = program.opts();
@@ -56,15 +56,14 @@ async function getCurrentVersion() {
 
 /**
  * Upload elements to google drive
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
  * @param {SaveElement} element Save element to upload
  */
 async function saveElements(elements: SaveElement[]) {
-  await authorize();
+  const credentials = await getAuthTokens(options.app || "firefox");
 
   elements.forEach((element) => {
     workerPool
-      .exec("saveElement", [element])
+      .exec("saveElement", [element, credentials])
       .then(() => {
         console.log(chalk.blue.bold(`Element saved ${element.path}`));
       })
@@ -80,9 +79,7 @@ async function saveElements(elements: SaveElement[]) {
 
 /**
  * Get elements to upload google drive
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
- * @param {SaveElement} element Save element to upload
- * @return {Promise<any>}
+ * @return {Promise<SaveElement[]>}
  */
 async function getElements(): Promise<SaveElement[]> {
   let saveElements: SaveElement[] = [];

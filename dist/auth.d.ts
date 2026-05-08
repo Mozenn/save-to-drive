@@ -1,11 +1,12 @@
+import { Credentials } from "google-auth-library";
 /**
- * Load or request or authorization to call APIs.
+ * Get an auth token using oauth2 flow, and return the credentials
  *
  */
-export declare function authorize(): Promise<import("google-auth-library").BaseExternalAccountClient | import("google-auth-library/build/src/auth/externalAccountAuthorizedUserClient.js").ExternalAccountAuthorizedUserClient | import("google-auth-library").OAuth2Client>;
+export declare function getAuthTokens(app: string, debug?: boolean): Promise<Credentials>;
 /**
- * Renew auth token when invalid
+ * Get an oauth2 client with the given credentials
  *
  */
-export declare function renewAuth(): Promise<import("google-auth-library").BaseExternalAccountClient | import("google-auth-library/build/src/auth/externalAccountAuthorizedUserClient.js").ExternalAccountAuthorizedUserClient | import("google-auth-library").OAuth2Client>;
+export declare function getOAuth2Client(credentials: Credentials): Promise<import("google-auth-library").OAuth2Client>;
 //# sourceMappingURL=auth.d.ts.map

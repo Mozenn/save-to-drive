@@ -6,7 +6,8 @@ import path from "path";
 import { SaveOptions } from "./types/SaveOptions.js";
 import { getNameFromPath } from "./utils.js";
 import { SaveElement } from "./types/SaveElement.js";
-import { authorize, renewAuth } from "./auth.js";
+import { Credentials } from "google-auth-library";
+import { getOAuth2Client } from "./auth.js";
 
 function generateRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -38,6 +39,7 @@ async function getFile(
 ) {
   const { mimeType = "folder" } = options;
   const drive = google.drive({ version: "v3", auth: authClient });
+  
   const res = await drive.files.list({
     q: `mimeType = 'application/vnd.google-apps.${mimeType}' and trashed = false and name = '${fileName}'`,
     fields: "nextPageToken, files(id, name, modifiedTime)",
@@ -195,25 +197,18 @@ async function uploadElement(authClient: any, element: SaveElement) {
 /**
  * Upload an element to google drive
  * @param {SaveElement} element Save element to upload
+ * @param {Credentials} credentials Google auth credentials
  */
-async function saveElement(element: SaveElement) {
+async function saveElement(element: SaveElement, credentials: Credentials) {
   if (fs.existsSync(element.path)) {
     const elementName = getNameFromPath(element.path);
 
-    let authClient = await authorize();
+    let authClient = await getOAuth2Client(credentials);
     let elementToDelete;
     try {
       elementToDelete = await getFile(authClient, elementName, element.options);
     } catch (error: any) {
       console.log(chalk.red.bold(`An error occurred: ${error.message}`));
-      if (error.message.includes("invalid_")) {
-        authClient = await renewAuth();
-        elementToDelete = await getFile(
-          authClient,
-          elementName,
-          element.options
-        );
-      }
     }
 
     await uploadElement(authClient, element);
@@ -225,6 +220,8 @@ async function saveElement(element: SaveElement) {
         deleteFileById(authClient, elementToDelete.id);
       }
     }
+  } else {
+    console.log(chalk.yellow.bold(`Path does not exist: ${element.path}`));
   }
 }
 

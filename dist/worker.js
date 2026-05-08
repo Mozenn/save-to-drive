@@ -4,7 +4,7 @@ import { google } from "googleapis";
 import * as fs from "fs";
 import path from "path";
 import { getNameFromPath } from "./utils.js";
-import { authorize, renewAuth } from "./auth.js";
+import { getOAuth2Client } from "./auth.js";
 function generateRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -158,21 +158,18 @@ async function uploadElement(authClient, element) {
 /**
  * Upload an element to google drive
  * @param {SaveElement} element Save element to upload
+ * @param {Credentials} credentials Google auth credentials
  */
-async function saveElement(element) {
+async function saveElement(element, credentials) {
     if (fs.existsSync(element.path)) {
         const elementName = getNameFromPath(element.path);
-        let authClient = await authorize();
+        let authClient = await getOAuth2Client(credentials);
         let elementToDelete;
         try {
             elementToDelete = await getFile(authClient, elementName, element.options);
         }
         catch (error) {
             console.log(chalk.red.bold(`An error occurred: ${error.message}`));
-            if (error.message.includes("invalid_")) {
-                authClient = await renewAuth();
-                elementToDelete = await getFile(authClient, elementName, element.options);
-            }
         }
         await uploadElement(authClient, element);
         if (element.options.deleteExisting ||
@@ -181,6 +178,9 @@ async function saveElement(element) {
                 deleteFileById(authClient, elementToDelete.id);
             }
         }
+    }
+    else {
+        console.log(chalk.yellow.bold(`Path does not exist: ${element.path}`));
     }
 }
 worker({
